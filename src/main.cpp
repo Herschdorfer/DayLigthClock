@@ -2,56 +2,56 @@
 
 #include "Arduino.h"
 #include "SunRiseClock.h"
-#include <Adafruit_NeoPixel.h>
 #include "sun/sun.h"
+#include <LiquidCrystal.h>
 
 #ifndef LED_BUILTIN
 #define LED_BUILTIN 13
 #endif
 
-#define NUMPIXELS 16
-#define PIN 8
+#define LCD_EN 11
+#define LCD_RS 12
+#define LCD_D4 5
+#define LCD_D5 4
+#define LCD_D6 3
+#define LCD_D7 2
 
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(60, PIN, NEO_GRB + NEO_KHZ800);
-
-int delayval = 500; // delay for half a second
+LiquidCrystal lcd(LCD_RS, LCD_EN, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
 
 void setup()
 {
   Serial.begin(115200);
-
   _log("Sunrise Alarm Clock starting");
 
   // initialize LED digital pin as an output.
   pinMode(LED_BUILTIN, OUTPUT);
 
-  pixels.begin(); // This initializes the NeoPixel library.
-}
+  Sun_init();
 
-RED red;
-GREEN green;
-BLUE blue;
+  // set up the LCD's number of columns and rows:
+  lcd.begin(16, 2);
+  // Print a message to the LCD.
+  lcd.print("hello, world!");
+}
 
 void loop()
 {
-  for (uint16_t time = 0; time < MAXSTEP; time++)
+  RGBColor_t colors;
+
+  for (uint16_t time = 0; time < SUN_MAXSTEP + 1; time++)
   {
-    uint8_t red_c = red.getCurrentColor(time);
-    uint8_t green_c = green.getCurrentColor(time);
-    uint8_t blue_c = blue.getCurrentColor(time);
-
-    _log("STEP %4d RED: %4d GREEN: %4d BLUE %4d \r\n", time, red_c, green_c, blue_c);
-
-    for (int i = 0; i < NUMPIXELS; i++)
-    {
-      pixels.setPixelColor(i, red_c, green_c, blue_c);
-      pixels.show();
-    }
+    colors = Sun_SetSunriseStep(time);
+    char lcd_buffer[16];
+    lcd.setCursor(0, 1);
+    sprintf(lcd_buffer, "r%3d g%3d b%3d", colors.red, colors.green, colors.blue);
+    lcd.print(lcd_buffer);
   }
+
+  Sun_SetSunOff();
 
   while (true)
   {
-  };
+  }
 }
 
 void _log(const char *format, ...)

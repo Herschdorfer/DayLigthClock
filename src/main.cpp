@@ -1,20 +1,27 @@
-#define DEBUG
+
 
 #include "Arduino.h"
 #include "SunRiseClock.h"
 #include "sun/sun.h"
 #include <LiquidCrystal.h>
 
-#ifndef LED_BUILTIN
-#define LED_BUILTIN 13
-#endif
+#define DEBUG
 
+#if defined(UNO)
 #define LCD_EN 11
 #define LCD_RS 12
 #define LCD_D4 5
 #define LCD_D5 4
 #define LCD_D6 3
 #define LCD_D7 2
+#elif defined(WEMOSBAT)
+#define LCD_EN 22
+#define LCD_RS 23
+#define LCD_D4 5
+#define LCD_D5 18
+#define LCD_D6 19
+#define LCD_D7 21
+#endif
 
 LiquidCrystal lcd(LCD_RS, LCD_EN, LCD_D4, LCD_D5, LCD_D6, LCD_D7);
 
@@ -22,9 +29,6 @@ void setup()
 {
   Serial.begin(115200);
   _log("Sunrise Alarm Clock starting");
-
-  // initialize LED digital pin as an output.
-  pinMode(LED_BUILTIN, OUTPUT);
 
   Sun_init();
 

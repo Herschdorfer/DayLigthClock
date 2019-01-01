@@ -3,7 +3,11 @@
 #include <Adafruit_NeoPixel.h>
 
 #define NUMPIXELS 16
+#if defined(UNO)
 #define PIN 8
+#elif defined(WEMOSBAT)
+#define PIN 17
+#endif
 
 Sun sun;
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(60, PIN, NEO_GRB + NEO_KHZ800);

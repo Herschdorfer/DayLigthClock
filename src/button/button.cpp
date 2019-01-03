@@ -1,14 +1,15 @@
-
 #include <Arduino.h>
 #include "button.h"
+#include "menu/menu.h"
+#include "serial.h"
 
 portMUX_TYPE muxL = portMUX_INITIALIZER_UNLOCKED;
 portMUX_TYPE muxC = portMUX_INITIALIZER_UNLOCKED;
 portMUX_TYPE muxR = portMUX_INITIALIZER_UNLOCKED;
 
-volatile int interruptCounterR = 0;
-volatile int interruptCounterL = 0;
-volatile int interruptCounterC = 0;
+volatile boolean interruptCounterR = false;
+volatile boolean interruptCounterL = false;
+volatile boolean interruptCounterC = false;
 
 #define L_BUTTON_PIN 14
 #define R_BUTTON_PIN 12
@@ -16,50 +17,53 @@ volatile int interruptCounterC = 0;
 
 void Button_handleButton()
 {
-    if (interruptCounterR > 0)
+    if (interruptCounterR)
     {
+        Serial_debug("BT", "RIGTH button Press dectected.");
         portENTER_CRITICAL_ISR(&muxL);
-        interruptCounterR--;
+        interruptCounterR = false;
         portEXIT_CRITICAL_ISR(&muxL);
 
-        Serial.println("right");
+        Menu_RightButtonPressed();
     }
-    if (interruptCounterC > 0)
+    if (interruptCounterC)
     {
+        Serial_debug("BT", "CENTER button Press dectected.");
         portENTER_CRITICAL_ISR(&muxC);
-        interruptCounterC--;
+        interruptCounterC = false;
         portEXIT_CRITICAL_ISR(&muxC);
 
-        Serial.println("center");
+        Menu_CenterButtonPressed();
     }
-    if (interruptCounterL > 0)
+    if (interruptCounterL)
     {
+        Serial_debug("BT", "LEFT button Press dectected.");
         portENTER_CRITICAL_ISR(&muxR);
-        interruptCounterL--;
+        interruptCounterL = false;
         portEXIT_CRITICAL_ISR(&muxR);
 
-        Serial.println("left");
+        Menu_LeftButtonPressed();
     }
 }
 
 void IRAM_ATTR handleLeftButton()
 {
     portENTER_CRITICAL_ISR(&muxL);
-    interruptCounterL++;
+    interruptCounterL = true;
     portEXIT_CRITICAL_ISR(&muxL);
 }
 
 void IRAM_ATTR handleCenterButton()
 {
     portENTER_CRITICAL_ISR(&muxC);
-    interruptCounterC++;
+    interruptCounterC = true;
     portEXIT_CRITICAL_ISR(&muxC);
 }
 
 void IRAM_ATTR handleRigthButton()
 {
     portENTER_CRITICAL_ISR(&muxR);
-    interruptCounterR++;
+    interruptCounterR = true;
     portEXIT_CRITICAL_ISR(&muxR);
 }
 

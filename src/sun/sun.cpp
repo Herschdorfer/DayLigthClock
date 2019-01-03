@@ -1,11 +1,10 @@
 #include "SunRiseClock.h"
 #include "sun.h"
 #include <Adafruit_NeoPixel.h>
+#include "serial.h"
 
 #define NUMPIXELS 16
-#if defined(UNO)
-#define PIN 8
-#elif defined(WEMOSBAT)
+#if defined(ESP32)
 #define PIN 17
 #endif
 
@@ -20,7 +19,7 @@ void Sun_init(void)
 RGBColor_t Sun_SetSunriseStep(uint16_t step)
 {
     RGBColor_t colors = sun.getColor(step);
-    _log("STEP %4d RED: %4d GREEN: %4d BLUE %4d \r\n", step, colors.red, colors.green, colors.blue);
+    Serial_log("SU", "STEP %4d RED: %4d GREEN: %4d BLUE %4d \r\n", step, colors.red, colors.green, colors.blue);
     for (int i = 0; i < NUMPIXELS; i++)
     {
         pixels.setPixelColor(i, colors.red, colors.green, colors.blue);
@@ -76,7 +75,7 @@ static Color_States_t _getCurrState(uint16_t step, Color_States_t *states, uint8
             }
         }
     }
-    _log("ERROR: Invalid curret state retuned at step %d\r\n", step);
+    Serial_log("SU", "ERROR: Invalid curret state retuned at step %d\r\n", step);
     return states[0];
 }
 
@@ -102,7 +101,7 @@ static Color_States_t _getNextState(uint16_t step, Color_States_t *states, uint8
             }
         }
     }
-    _log("ERROR: Invalid next state retuned at step %d\n\r", step);
+    Serial_log("SU", "ERROR: Invalid next state retuned at step %d\n\r", step);
     return states[0];
 }
 
